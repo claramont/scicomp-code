@@ -1,0 +1,20 @@
+[project]
+name = "scicomp-code"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Clara Montemurro",email = "clara.montemurro02@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy (>=2.4.6,<3.0.0)",
+    "matplotlib (>=3.11.0,<4.0.0)",
+    "scipy (>=1.17.1,<2.0.0)",
+    "ipykernel (>=7.3.0,<8.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
