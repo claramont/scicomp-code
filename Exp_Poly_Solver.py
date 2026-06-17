@@ -1,14 +1,14 @@
 import numpy as np
 from scipy.sparse import lil_matrix, eye
+from scipy.linalg import expm
 from scipy.sparse.linalg import spsolve
 
 class SphericalExpRKSolver:
-    def __init__(self, N, dt, Bi, omega, theta, t_end):
+    def __init__(self, N, dt, Bi, omega, t_end):
         self.N = N
         self.dt = dt
         self.Bi = Bi
         self.omega = omega
-        self.theta = theta
         self.t_end = t_end
 
         self.dr = 1 / (self.N-1)
@@ -57,5 +57,46 @@ class SphericalExpRKSolver:
 
 
     def solve(self):
+        N = self.N
+        dt = self.dt
+        A = self.A.toarray()
+
+        nsteps = int(self.t_end / dt) # 0, 1, ..., Nsteps
+        times = np.linspace(0.0, nsteps*dt, nsteps +1)
+
+        U = np.zeros((nsteps+1, N))
+
+        # initial condition: u(r_j, 0) = 0 for all j
+        u = np.zeros(N)
+        U[0,:] = u
+
+        H = dt * A
+        I = np.eye(N)
+
+        # E = exp(hA)
+        E = expm(H)
+
+        for n in range(nsteps):
+            tn = times[n]
+            tn_next = times[n+1]
+
+            k1 = self.b(tn)
+            k2 = self.b(tn_next)
+            
+            # compute r1, r2
+            r1 = (E - I) @ k1
+            r2 = (E - I - H) @ (k2-k1)
+
+            # s1: H @ s1  = r1
+            s1 = np.linalg.solve(H, r1)
+
+            # s2: H @ q = r2, H@s2 = q
+            q = np.linalg.solve(H, r2)
+            s2 = np.linalg.solve(H, q)
+
+            u = E @ u + dt * (s1 + s2)
+            U[n+1, :] = u
         
+        return times, self.r, U
+
 
